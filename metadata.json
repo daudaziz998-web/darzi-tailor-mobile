@@ -1,0 +1,6 @@
+{
+  "name": "Darzi Master - Tailor Shop Management",
+  "description": "Clean, professional tailor shop management system with customer measurements, multilingual Urdu/English support, payments, and price management.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

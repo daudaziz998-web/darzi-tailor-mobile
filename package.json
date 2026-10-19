@@ -1,0 +1,83 @@
+{
+  "name": "awais-tailor-house",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "main": "dist-electron/main.js",
+  "scripts": {
+    "dev": "tsx server.ts",
+    "start": "tsx server.ts",
+    "build": "vite build",
+    "build:electron": "esbuild electron/main.ts --bundle --platform=node --format=esm --outfile=dist-electron/main.js --external:electron && esbuild electron/preload.ts --bundle --platform=node --format=cjs --outfile=dist-electron/preload.js --external:electron",
+    "build:server": "esbuild server.ts --bundle --platform=node --format=esm --banner:js=\"import { createRequire as _createRequire } from 'module'; import { fileURLToPath as _fileURLToPath } from 'url'; import { dirname as _dirnamePath } from 'path'; const require = _createRequire(import.meta.url); const __filename = _fileURLToPath(import.meta.url); const __dirname = _dirnamePath(__filename);\" --outfile=dist-electron/server.js --external:electron --external:vite && node -e \"const fs=require('fs'); fs.copyFileSync('node_modules/sql.js/dist/sql-wasm.wasm', 'dist-electron/sql-wasm.wasm');\"",
+    "dist": "npm run build && npm run build:electron && npm run build:server && electron-builder --win",
+    "cap:sync": "npm run build && npx cap sync android",
+    "cap:build": "npm run build && npx cap sync android && cd android && ./gradlew assembleDebug",
+    "cap:build:win": "npm run build && npx cap sync android && cd android && gradlew.bat assembleDebug",
+    "cap:open": "npx cap open android",
+    "preview": "vite preview",
+    "clean": "rm -rf dist dist-electron release",
+    "lint": "tsc --noEmit"
+  },
+  "build": {
+    "appId": "com.awaistailor.management",
+    "productName": "Awais Tailor House",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*",
+      "node_modules/sql.js/dist/sql-wasm.wasm"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Awais Tailor House"
+    }
+  },
+  "dependencies": {
+    "@capacitor/core": "^8.5.3",
+    "@google/genai": "^2.4.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "@vitejs/plugin-react": "^6.1.1",
+    "dotenv": "^17.2.3",
+    "express": "^4.21.2",
+    "lucide-react": "^0.546.0",
+    "motion": "^12.23.24",
+    "react": "^19.0.1",
+    "react-dom": "^19.0.1",
+    "sql.js": "^1.14.2",
+    "vite": "^8.3.2"
+  },
+  "devDependencies": {
+    "@capacitor/android": "^8.5.3",
+    "@capacitor/cli": "^8.5.3",
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.14.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/sql.js": "^1.4.11",
+    "autoprefixer": "^10.4.21",
+    "electron": "^44.5.1",
+    "electron-builder": "^26.15.3",
+    "esbuild": "^0.28.2",
+    "tailwindcss": "^4.3.3",
+    "tsx": "^4.21.0",
+    "typescript": "^7.0.2"
+  }
+}

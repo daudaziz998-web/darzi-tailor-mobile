@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+@layer base {
+  html, body {
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  [dir="rtl"] {
+    font-family: 'Noto Sans Arabic', 'Segoe UI', Tahoma, Arial, sans-serif;
+  }
+}
+
+/* Hide scrollbars for clean mobile touch sliders */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Printing styles for Thermal 58mm, 80mm & A4 */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Hide entire application shell during print */
+  header,
+  footer,
+  nav,
+  button,
+  .no-print {
+    display: none !important;
+  }
+
+  /* Scoped print container */
+  #printable-thermal,
+  #printable-a4 {
+    position: absolute;
+    left: 0;
+    top: 0;
+    margin: 0;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  @page {
+    margin: 4mm;
+  }
+}
