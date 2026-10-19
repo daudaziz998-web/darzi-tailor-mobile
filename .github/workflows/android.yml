@@ -1,55 +1,52 @@
-
 name: Build Android APK
-
 on:
   workflow_dispatch:
   push:
     branches:
       - main
-
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
+      - name: Free Disk Space
+        run: |
+          echo "Disk space before cleanup:"
+          df -h /
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          echo "Disk space after cleanup:"
+          df -h /
       - name: Checkout Repository
         uses: actions/checkout@v4
-
       - name: Setup Java JDK
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
-
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
+        uses: android-actions/setup-android@v4
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: npm
-
       - name: Install Dependencies
         run: npm install
-
       - name: Build Web App
         run: npm run build --if-present
-
       - name: Build Android APK
         run: |
           if [ -f android/gradlew ]; then
             cd android
             chmod +x gradlew
-            ./gradlew assembleDebug
+            ./gradlew --no-daemon assembleDebug
           else
-            echo "Android Gradle project not found!"
+            echo "ERROR: Android Gradle project not found!"
             exit 1
           fi
-
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Android-APK
+          name: Darzi-Tailor-Android-APK
           path: android/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
+          retention-days: 7
