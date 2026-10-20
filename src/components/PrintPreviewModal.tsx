@@ -2,6 +2,8 @@ import React from 'react';
 import { useApp } from '../context/AppContext';
 import { Customer, OrderPaymentRecord, PrintFormat } from '../types';
 import { Printer, X, Scissors, Phone, MapPin, Calendar, FileText, Check } from 'lucide-react';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 export const PrintPreviewModal: React.FC = () => {
   const { 
@@ -33,6 +35,88 @@ export const PrintPreviewModal: React.FC = () => {
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleSaveAsPdf = async () => {
+    const element = document.getElementById(activePrintFormat === 'a4' ? 'printable-a4' : 'printable-thermal');
+    if (!element) return;
+    try {
+      const canvas = await html2canvas(element, { 
+        scale: 2.5, 
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff',
+        onclone: (clonedDoc) => {
+          // 1. Inject standard HEX/RGB overrides for all Tailwind v4 color variables
+          const style = clonedDoc.createElement('style');
+          style.textContent = `
+            :root, * {
+              --color-slate-50: #f8fafc !important;
+              --color-slate-100: #f1f5f9 !important;
+              --color-slate-200: #e2e8f0 !important;
+              --color-slate-300: #cbd5e1 !important;
+              --color-slate-400: #94a3b8 !important;
+              --color-slate-500: #64748b !important;
+              --color-slate-600: #475569 !important;
+              --color-slate-700: #334155 !important;
+              --color-slate-800: #1e293b !important;
+              --color-slate-900: #0f172a !important;
+              --color-slate-950: #020617 !important;
+              
+              --color-amber-50: #fffbeb !important;
+              --color-amber-100: #fef3c7 !important;
+              --color-amber-200: #fde68a !important;
+              --color-amber-300: #fcd34d !important;
+              --color-amber-400: #fbbf24 !important;
+              --color-amber-500: #f59e0b !important;
+              --color-amber-600: #d97706 !important;
+              --color-amber-700: #b45309 !important;
+              --color-amber-800: #92400e !important;
+              --color-amber-900: #78350f !important;
+              --color-amber-950: #451a03 !important;
+
+              --color-emerald-50: #ecfdf5 !important;
+              --color-emerald-300: #6ee7b7 !important;
+              --color-emerald-600: #059669 !important;
+              --color-emerald-900: #064e3b !important;
+            }
+            body { background: #ffffff !important; color: #000000 !important; }
+            * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          `;
+          clonedDoc.head.insertBefore(style, clonedDoc.head.firstChild);
+
+          // 2. Fallback sweep: replace any inline or computed oklch reference
+          const walker = clonedDoc.createTreeWalker(clonedDoc.body, NodeFilter.SHOW_ELEMENT);
+          let node: Node | null;
+          while ((node = walker.nextNode())) {
+            if (node instanceof HTMLElement) {
+              const el = node as HTMLElement;
+              ['color', 'backgroundColor', 'borderColor'].forEach(prop => {
+                const val = el.style.getPropertyValue(prop);
+                if (val && val.includes('oklch')) {
+                  el.style.setProperty(prop, prop === 'color' ? '#000000' : '#ffffff', 'important');
+                }
+              });
+            }
+          }
+        }
+      });
+      const imgData = canvas.toDataURL('image/png');
+      const isA4 = activePrintFormat === 'a4';
+      const pdfWidth = isA4 ? 210 : (activePrintFormat === 'thermal-58' ? 58 : 80);
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: isA4 ? 'a4' : [pdfWidth, Math.max(pdfHeight, 100)]
+      });
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`Measurement_${customer?.name || 'Slip'}_${activePrintRecord.date}.pdf`);
+    } catch (err) {
+      console.error('PDF generation error:', err);
+      window.print();
+    }
   };
 
   const m = activePrintRecord.measurements;
@@ -204,14 +288,25 @@ export const PrintPreviewModal: React.FC = () => {
               </button>
             </div>
 
-            <button
-              type="button"
-              onClick={handlePrint}
-              className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-lg text-xs sm:text-sm shadow-xs transition-colors shrink-0"
-            >
-              <Printer className="w-4 h-4 shrink-0" />
-              <span>{t('printMeasurement')}</span>
-            </button>
+            <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap shrink-0">
+              <button
+                type="button"
+                onClick={handlePrint}
+                className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-lg text-xs sm:text-sm shadow-xs transition-colors"
+              >
+                <Printer className="w-4 h-4 shrink-0" />
+                <span>{t('printRecord')}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleSaveAsPdf}
+                className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-lg text-xs sm:text-sm shadow-xs transition-colors"
+              >
+                <FileText className="w-4 h-4 shrink-0 text-amber-400" />
+                <span>{t('saveAsPdf')}</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -242,7 +337,7 @@ export const PrintPreviewModal: React.FC = () => {
               <div className="border-b border-dashed border-black pb-1.5 mb-2 text-[11px]">
                 <div className="flex justify-between font-bold">
                   <span>CUST:</span>
-                  <span className="truncate max-w-[180px]">{customer?.name}</span>
+                  <span className="font-bold text-end break-words max-w-[190px]">{customer?.name}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>TEL:</span>
@@ -377,7 +472,7 @@ export const PrintPreviewModal: React.FC = () => {
               <div className="grid grid-cols-2 gap-4 bg-slate-50 p-3.5 rounded-lg border border-slate-200 mb-4 text-xs">
                 <div>
                   <div className="font-bold text-slate-500 uppercase text-[10px]">Customer Information</div>
-                  <div className="text-base font-black text-slate-900">{customer?.name}</div>
+                  <div className="text-base font-black text-slate-900 break-words">{customer?.name}</div>
                   <div className="font-mono text-slate-700 font-bold">{customer?.phone}</div>
                   <div className="text-slate-600">{customer?.address || settings.location}</div>
                 </div>

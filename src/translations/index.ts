@@ -297,6 +297,8 @@ export const translations = {
     // Printing System
     printMeasurement: 'PRINT MEASUREMENT',
     printPreviewTitle: 'Measurement Print Preview',
+    saveAsPdf: 'Save as PDF',
+    printRecord: 'Print',
     formatThermal58: 'Thermal 58mm',
     formatThermal80: 'Thermal 80mm',
     formatA4: 'A4 Sheet',
@@ -623,6 +625,8 @@ export const translations = {
     // Printing System
     printMeasurement: 'ناپ پرچی پرنٹ کریں',
     printPreviewTitle: 'ناپ پرچی پرنٹ پریویو',
+    saveAsPdf: 'پی ڈی ایف محفوظ کریں',
+    printRecord: 'پرنٹ کریں',
     formatThermal58: 'تھرمل 58 ملی میٹر',
     formatThermal80: 'تھرمل 80 ملی میٹر',
     formatA4: 'A4 شیٹ',

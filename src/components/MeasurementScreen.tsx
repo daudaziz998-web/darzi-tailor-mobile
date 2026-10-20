@@ -427,29 +427,29 @@ export const MeasurementScreen: React.FC = () => {
     <div className="space-y-3 pb-8">
       {/* Customer & Measurement Status Banner */}
       <div className="bg-slate-900 text-white rounded-xl px-4 py-2.5 shadow-xs flex flex-wrap items-center justify-between gap-2.5 no-print">
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2.5 min-w-0 flex-1">
           <div className="w-8 h-8 rounded-lg bg-amber-500 text-slate-950 font-black text-sm flex items-center justify-center shrink-0">
             {currentCustomer.name.charAt(0)}
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-base sm:text-lg font-black text-white">{currentCustomer.name}</span>
-              <span className="text-amber-400 font-mono font-bold text-sm">· {currentCustomer.phone}</span>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-base sm:text-lg font-black text-white truncate max-w-full">{currentCustomer.name}</span>
+              <span className="text-amber-400 font-mono font-bold text-sm shrink-0">· {currentCustomer.phone}</span>
             </div>
 
             {/* Existing Saved Record vs New Record Indicator */}
-            <div className="flex items-center gap-2 text-xs mt-0.5">
+            <div className="flex items-center gap-2 text-xs mt-0.5 flex-wrap">
               {isEditingExisting ? (
-                <span className="inline-flex items-center gap-1 text-emerald-400 font-semibold bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-800/80">
-                  <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-                  <span>
+                <span className="inline-flex items-center gap-1 text-emerald-400 font-semibold bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-800/80 whitespace-normal break-words max-w-full">
+                  <CheckCircle2 className="w-3 h-3 text-emerald-400 shrink-0" />
+                  <span className="break-words">
                     {language === 'ur' ? 'محفوظ ناپ (تبدیل کریں)' : 'Saved Measurement Record'} · {existingRecord.date}
                   </span>
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1 text-amber-300 font-semibold bg-amber-950/80 px-2 py-0.5 rounded border border-amber-800/80">
-                  <Plus className="w-3 h-3" />
-                  <span>{language === 'ur' ? 'نیا ناپ ریکارڈ' : 'New Measurement Record'}</span>
+                <span className="inline-flex items-center gap-1 text-amber-300 font-semibold bg-amber-950/80 px-2 py-0.5 rounded border border-amber-800/80 whitespace-normal break-words max-w-full">
+                  <Plus className="w-3 h-3 shrink-0" />
+                  <span className="break-words">{language === 'ur' ? 'نیا ناپ ریکارڈ' : 'New Measurement Record'}</span>
                 </span>
               )}
 
@@ -461,7 +461,7 @@ export const MeasurementScreen: React.FC = () => {
                     const val = e.target.value;
                     setScreen('measurement', currentCustomer.id, val);
                   }}
-                  className="bg-slate-800 text-slate-200 border border-slate-700 rounded px-1.5 py-0.5 text-[11px] font-medium outline-none"
+                  className="bg-slate-800 text-slate-200 border border-slate-700 rounded px-1.5 py-0.5 text-[11px] font-medium outline-none max-w-full truncate"
                 >
                   {customerRecords.map((r, i) => (
                     <option key={r.id} value={r.id}>
@@ -517,14 +517,26 @@ export const MeasurementScreen: React.FC = () => {
           </button>
 
           {existingRecord && (
-            <button
-              type="button"
-              onClick={() => openPrintModal(existingRecord)}
-              className="flex items-center justify-center gap-1 px-2.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black rounded-lg transition-colors shadow-2xs w-full sm:w-auto"
-            >
-              <Printer className="w-3.5 h-3.5 shrink-0" />
-              <span className="truncate">{t('printMeasurement')}</span>
-            </button>
+            <div className="flex items-center gap-1.5 w-full sm:w-auto">
+              <button
+                type="button"
+                onClick={() => openPrintModal(existingRecord)}
+                className="flex items-center justify-center gap-1 px-2.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black rounded-lg transition-colors shadow-2xs flex-1 sm:flex-initial"
+                title="Print measurement record"
+              >
+                <Printer className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate">{t('printRecord')}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => openPrintModal(existingRecord)}
+                className="flex items-center justify-center gap-1 px-2.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-lg transition-colors shadow-2xs flex-1 sm:flex-initial"
+                title="Save measurement as PDF"
+              >
+                <FileText className="w-3.5 h-3.5 shrink-0 text-amber-400" />
+                <span className="truncate">{t('saveAsPdf')}</span>
+              </button>
+            </div>
           )}
 
           <button
@@ -549,19 +561,27 @@ export const MeasurementScreen: React.FC = () => {
             </span>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap justify-end">
             <button
               type="button"
               onClick={() => openPrintModal(savedSuccessRecord)}
-              className="px-3 py-1 bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs rounded transition-colors flex items-center gap-1"
+              className="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs rounded transition-colors flex items-center gap-1 shadow-2xs"
             >
-              <Printer className="w-3 h-3 text-amber-400" />
-              <span>{t('printMeasurement')}</span>
+              <Printer className="w-3 h-3 shrink-0" />
+              <span>{t('printRecord')}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => openPrintModal(savedSuccessRecord)}
+              className="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded transition-colors flex items-center gap-1 shadow-2xs"
+            >
+              <FileText className="w-3 h-3 text-amber-400 shrink-0" />
+              <span>{t('saveAsPdf')}</span>
             </button>
             <button
               type="button"
               onClick={() => setScreen('customer-profile', currentCustomer.id)}
-              className="px-3 py-1 bg-white hover:bg-emerald-100 border border-emerald-300 font-bold text-xs rounded transition-colors"
+              className="px-2.5 py-1 bg-white hover:bg-emerald-100 border border-emerald-300 font-bold text-xs rounded transition-colors"
             >
               {t('backToProfile')}
             </button>
